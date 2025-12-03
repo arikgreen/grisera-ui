@@ -24,6 +24,28 @@
           :has-title="true"
           title="You are currently working on the following dataset:"
         />
+<<<<<<< Updated upstream
+=======
+        <div
+          v-else-if="noDatasets"
+          class="subtitle-1 font-weight-light"
+          style="line-height: 1.6; color: red;"
+        >
+          There are no datasets available. Please contact the administrator.<br>
+          You can also create a new dataset by navigating to the <router-link to="/datasets">
+            Datasets page
+          </router-link>.
+        </div>
+        <div
+          v-else
+          class="subtitle-1 font-weight-light"
+          style="line-height: 1.6; color: orangered;"
+        >
+          Please select a dataset to view its details. You can do this by navigating to the <router-link to="/datasets">
+            Datasets page
+          </router-link>.
+        </div>
+>>>>>>> Stashed changes
       </v-col>
     </v-row>
   </v-container>

@@ -7,10 +7,14 @@ export default [
     name: 'datasets',
     component: () => import('@/views/datasets/DatasetsView.vue'),
     meta: {
+      icon: 'mdi-database',
+      order: 20,
+      name: 'Datasets',
+      hideFilters: true,
       breadcrumbs: [
         { text: 'Datasets', disabled: true },
       ],
-      disableNavigation: true,
+      disableNavigation: false,
       infoMessage: ClassesDescriptions.DATASET,
     },
   },
