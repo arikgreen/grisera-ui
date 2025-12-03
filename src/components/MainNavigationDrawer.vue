@@ -56,15 +56,15 @@
         <v-btn
           :outlined="true"
           color="white"
-          @click="logout()"
+          @click="isAuthenticated ? logout() : login()"
         >
           <v-icon
             class="ma-auto"
             left
           >
-            mdi-arrow-left
+            {{ isAuthenticated ? 'mdi-arrow-left' : 'mdi-login' }}
           </v-icon>
-          LOG OUT
+          {{ isAuthenticated ? 'LOG OUT' : 'LOG IN' }}
         </v-btn>
         <div class="pt-8 navbar-copyrights">
           &copy; GRISERA 2025
@@ -118,6 +118,7 @@ export default {
       possibleFilters: PossibleFilters,
       showButton: true,
       localHideFilters: true,
+      isAuthenticated: false,
     };
   },
   computed: {
@@ -168,6 +169,13 @@ export default {
       AuthService.logout();
       this.$router.push('/login');
     },
+    login() {
+      AuthService.login();
+      this.$router.push('/login');
+    },
+  },
+  mounted() {
+    this.isAuthenticated = AuthService.isAuthenticated();
   },
 };
 </script>
