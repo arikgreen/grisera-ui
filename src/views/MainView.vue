@@ -21,11 +21,10 @@
       </v-col>
       <v-col class="col-12">
         <dataset-card
+          v-if="currentDataset && currentDataset !== 'undefined'"
           :has-title="true"
-          title="You are currently working on the following dataset:"
+          :title="`You are currently working on the following dataset: ${currentDataset}`"
         />
-<<<<<<< Updated upstream
-=======
         <div
           v-else-if="noDatasets"
           class="subtitle-1 font-weight-light"
@@ -45,7 +44,6 @@
             Datasets page
           </router-link>.
         </div>
->>>>>>> Stashed changes
       </v-col>
     </v-row>
   </v-container>
@@ -56,6 +54,7 @@ import ActivitiesAPI from '@/api/ActivitiesAPI';
 import ExperimentsAPI from '@/api/ExperimentsAPI';
 import ParticipantsAPI from '@/api/ParticipantsAPI';
 import TimeSeriesAPI from '@/api/TimeSeriesApi';
+import DatasetAPI from '@/api/DatasetAPI';
 import AppBreadcrumbs from '@/components/AppBreadcrumbs.vue';
 import DashboardInfoCard from '@/components/DashboardInfoCard.vue';
 import DatasetCard from '@/components/DatasetCard.vue';
@@ -69,6 +68,7 @@ export default {
   },
   data() {
     return {
+      datasets: [], // Will be populated from API
       breadcrumbs: [],
       scores: [
         { title: 'Total experiments', url: '/experiments', loading: true },
@@ -76,26 +76,48 @@ export default {
         { title: 'Total participants', url: '/participants', loading: true },
         { title: 'Total time series', loading: true },
       ],
+      noDatasets: false, // Will be set after datasets are loaded
+      currentDataset: this.$store.state.dataset?.name || undefined,
     };
+  },
+  methods: {
+    async loadDatasets() {
+      try {
+        console.log('Loading datasets...');
+        const response = await DatasetAPI.index();
+        this.datasets = response.data || [];
+        this.noDatasets = this.datasets.length === 0;
+        console.log('Datasets count:', this.datasets.length);
+      } catch (error) {
+        console.error('Error loading datasets:', error);
+        this.datasets = [];
+        this.noDatasets = true;
+      }
+    },
   },
   async created() {
     try {
+      // Load datasets first
+      await this.loadDatasets();
+
+      console.log('Fetching dashboard statistics...');
+      console.log('Current dataset:', this.currentDataset);
+
+      if (this.currentDataset === 'undefined' || !this.currentDataset) {
+        this.scores = this.scores.map(score => ({ ...score, loading: false, score: 'N/A' }));
+        return;
+      }
+
       const updatedScores = await Promise.all([
         { title: 'Total experiments', url: '/experiments', score: await ExperimentsAPI.count() },
         { title: 'Total activities', url: '/activities', score: await ActivitiesAPI.count() },
         { title: 'Total participants', url: '/participants', score: await ParticipantsAPI.count() },
         { title: 'Total time series', score: await TimeSeriesAPI.count() },
       ]);
-      this.scores =
-        updatedScores.map(score => (
-          { ...score, loading: false }
-        ));
+      this.scores = updatedScores.map(score => ({ ...score, loading: false }));
     } catch (error) {
       console.error('Error fetching dashboard statistics:', error);
-      this.scores =
-        this.scores.map(score => (
-          { ...score, loading: false, score: 'Error' }
-        ));
+      this.scores = this.scores.map(score => ({ ...score, loading: false, score: 'Error' }));
     }
   },
 };
