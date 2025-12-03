@@ -7,6 +7,18 @@
     <template #default>
       <v-container class="container--fluid pa-0">
         <v-row>
+          <v-col class="shrink pa-0 my-auto">
+            <v-list-item class="pe-0">
+              <v-list-item-avatar>
+                <v-icon
+                  color="primary"
+                  @click="$router.push('/')"
+                >
+                  mdi-home
+                </v-icon>
+              </v-list-item-avatar>
+            </v-list-item>
+          </v-col>
           <v-col class="shrink pa-0">
             <v-list-item>
               <v-list-item-avatar v-if="mobile && !$route.meta.disableNavigation">
@@ -43,6 +55,11 @@
                   </v-tooltip>
                 </v-list-item-subtitle>
               </v-list-item-content>
+              <v-list-item-content v-else>
+                <v-list-item-title class="caption">
+                  No dataset selected
+                </v-list-item-title>
+              </v-list-item-content>
             </v-list-item>
           </v-col>
           <v-spacer />
@@ -52,7 +69,7 @@
                 class="white--text"
                 color="accent"
               >
-                TT
+                {{ userName.substring(0, 1).toUpperCase() }}
               </v-list-item-avatar>
               <v-list-item-content>
                 <v-list-item-title>
@@ -74,7 +91,7 @@
                   mdi-menu-down
                 </v-icon>
               </template>
-              <v-list>
+              <v-list v-if="isAuthenticated">
                 <v-list-item @click="account()">
                   <v-list-item-icon>
                     <v-icon v-text="'mdi-account'" />
@@ -86,6 +103,14 @@
                     <v-icon v-text="'mdi-logout'" />
                   </v-list-item-icon>
                   <v-list-item-title>Logout</v-list-item-title>
+                </v-list-item>
+              </v-list>
+              <v-list v-else>
+                <v-list-item @click="login()">
+                  <v-list-item-icon>
+                    <v-icon v-text="'mdi-login'" />
+                  </v-list-item-icon>
+                  <v-list-item-title>Login</v-list-item-title>
                 </v-list-item>
               </v-list>
             </v-menu>
@@ -110,7 +135,8 @@ export default {
   },
   data() {
     return {
-      userName: 'Guest',
+      userName: '',
+      isAuthenticated: false,
     };
   },
   computed: {
@@ -121,6 +147,7 @@ export default {
   },
   mounted() {
     this.userName = AuthService.getIdTokenParsed()?.preferred_username || 'Guest';
+    this.isAuthenticated = AuthService.isAuthenticated();
   },
   methods: {
     logout() {
@@ -129,6 +156,10 @@ export default {
     },
     account() {
       AuthService.accountManagement();
+    },
+    login() {
+      AuthService.login();
+      this.$router.push('/login');
     },
   },
 };
