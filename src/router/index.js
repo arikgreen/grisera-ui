@@ -24,6 +24,8 @@ const routes = [
   ...modalityRoutes,
   ...participantRoutes,
   {
+    // don't show in sidebar
+    hidden: true,
     path: '/',
     name: 'main',
     component: () => import('@/views/MainView.vue'),

@@ -15,7 +15,7 @@
     </div>
     <v-list>
       <v-list-item
-        v-for="route in routes"
+        v-for="route in routes.filter(r => !r.hidden)"
         :key="route.name"
         :to="route.path"
       >
