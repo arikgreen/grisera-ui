@@ -55,8 +55,6 @@ export default {
           ...config,
           text: config.text.replace('[value]', newText ? `(${ newText })` : newText).trim(),
         };
-
-        return config;
       });
     },
   },
