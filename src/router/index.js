@@ -111,6 +111,20 @@ const routes = [
     },
   },
   {
+    path: '/search',
+    name: 'search',
+    component: () => import('@/views/search/SearchView.vue'),
+    meta: {
+      icon: 'mdi-magnify',
+      order: 20,
+      name: 'Search',
+      hideFilters: true,
+      breadcrumbs: [
+        { text: 'Search', disabled: true },
+      ],
+    },
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: () => import('@/views/settings/SettingsView.vue'),
