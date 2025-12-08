@@ -46,89 +46,55 @@
         <!-- Multiselect Filters Placeholder -->
         <v-card>
           <v-card-title class="py-2">
-            Experiments Filter
+            Areas Filter
           </v-card-title>
           <v-card-text>
-            <select
-              v-model="selectedExperiments"
-              multiple
-              chips
-              outlined
-              dense
-              hide-details
-              style="border: 1px solid #ccc; width: 100%;"
-              class="py-2 px-1"
+            <div
+              class="d-flex flex-column"
+              style="border: 1px solid #ccc; width: 100%; height: 100%;"
             >
-              <option value="exp1">
-                Exp 1
-              </option>
-              <option value="exp2">
-                Exp 2
-              </option>
-              <option value="exp3">
-                Exp 3
-              </option>
-            </select>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col class="col-3">
-        <!-- Multiselect Filters Placeholder -->
-        <v-card>
-          <v-card-title class="py-2">
-            Activities Filter
-          </v-card-title>
-          <v-card-text>
-            <select
-              v-model="selectedActivities"
-              multiple
-              chips
-              outlined
-              dense
-              hide-details
-              style="border: 1px solid #ccc; width: 100%;"
-              class="py-2 px-1"
-            >
-              <option value="act1">
-                Activity 1
-              </option>
-              <option value="act2">
-                Activity 2
-              </option>
-              <option value="act3">
-                Activity 3
-              </option>
-            </select>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col class="col-3">
-        <!-- Multiselect Filters Placeholder -->
-        <v-card>
-          <v-card-title class="py-2">
-            Participants Filter
-          </v-card-title>
-          <v-card-text>
-            <select
-              v-model="selectedParticipants"
-              multiple
-              chips
-              outlined
-              dense
-              hide-details
-              style="border: 1px solid #ccc; width: 100%;"
-              class="py-2 px-1"
-            >
-              <option value="participant1">
-                Participant 1
-              </option>
-              <option value="participant2">
-                Participant 2
-              </option>
-              <option value="participant3">
-                Participant 3
-              </option>
-            </select>
+              <div class="d-flex flex-wrap">
+                <v-checkbox
+                  v-model="selectedCollections"
+                  label="Activities"
+                  value="collectionActi"
+                  hide-details
+                  dense
+                  class="mr-4"
+                />
+                <v-checkbox
+                  v-model="selectedCollections"
+                  label="Experiments"
+                  value="collectionExpe"
+                  hide-details
+                  dense
+                  class="mr-4"
+                />
+                <v-checkbox
+                  v-model="selectedCollections"
+                  label="Measurements"
+                  value="collectionMeas"
+                  hide-details
+                  dense
+                  class="mr-4"
+                />
+                <v-checkbox
+                  v-model="selectedCollections"
+                  label="Participants"
+                  value="collectionPart"
+                  hide-details
+                  dense
+                  class="mr-4"
+                />
+                <v-checkbox
+                  v-model="selectedCollections"
+                  label="Channels"
+                  value="collectionChan"
+                  hide-details
+                  dense
+                />
+              </div>
+            </div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -138,8 +104,8 @@
         <v-row>
           <v-col cols="10">
             <v-text-field
-              v-model="searchQuery"
-              label="Search"
+              v-model="searchText"
+              label="What are you looking for?"
               outlined
               dense
               hide-details
@@ -176,6 +142,7 @@
 import LocalStorageService from '@/storage/LocalStorageService';
 import AppBreadcrumbs from '@/components/AppBreadcrumbs.vue';
 import DatasetAPI from '@/api/DatasetAPI';
+import SearchAPI from '@/api/SearchAPI';
 
 export default {
   name: 'SearchView',
@@ -185,22 +152,15 @@ export default {
   data() {
     return { 
       selectedDatasets: [],
-      selectedExperiments: [],
-      selectedActivities: [],
-      selectedParticipants: [],
+      selectedCollections: [],
       datasets: [],
-      experiments: [],
-      activities: [],
-      participants: [],
-      searchQuery: '',
+      collections: [],
+      searchText: '',
       searchResultsText: 'Search Results will be displayed here.',
     };
   },
   async created() {
       await this.fetchDatasets();
-      await this.fetchExperiments();
-      await this.fetchActivities();
-      await this.fetchParticipants();
   },
   methods: {
     resetStorage() {
@@ -220,28 +180,43 @@ export default {
         this.noDatasets = true;
       }
     },
-    async fetchExperiments() {
-      // Placeholder for fetching experiments
-      console.log('Fetching experiments...');
-    },
-    async fetchActivities() {
-      // Placeholder for fetching activities
-      console.log('Fetching activities...');
-    },
-    async fetchParticipants() {
-      // Placeholder for fetching participants
-      console.log('Fetching participants...');
-    },
-    search() {
+    async search() {
       // Placeholder for search functionality
       console.log('Performing search with filters:', {
         datasets: this.selectedDatasets,
-        experiments: this.selectedExperiments,
-        activities: this.selectedActivities,
-        participants: this.selectedParticipants,
-        searchQuery: this.searchQuery,
+        collections: this.selectedCollections,
+        searchText: this.searchText,
       });
-      this.searchResultsText = `Search performed with query: "${this.searchQuery}" and selected filters.`;
+      // Get activities from selected datasets
+      let activitiesFromDatasets = [];
+      if (this.searchText.length > 3 && this.selectedDatasets.length > 0) {
+        try {
+          for (const datasetId of this.selectedDatasets) {
+            const response = await SearchAPI.search_in_dataset(datasetId, this.searchText);
+            if (response.data) {
+              activitiesFromDatasets = [...activitiesFromDatasets, ...response.data];
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching activities from datasets:', error);
+        }
+      }
+      else {
+        // show modal or notification about insufficient input
+        console.warn('Please enter at least 4 characters and select at least one dataset to perform a search.');
+        alert('Please enter at least 4 characters and select at least one dataset to perform a search.');
+        return;
+      }
+      // // Filter activities based on search text
+      // if (this.searchText) {
+      //   const filteredActivities = activitiesFromDatasets.filter(activity => 
+      //     activity.name && activity.name.toLowerCase().includes(this.searchText.toLowerCase())
+      //   );
+      //   console.log('Filtered activities:', filteredActivities);
+      // }
+
+      this.searchResultsText = `Search performed with query: "${this.searchText}" and selected filters.`;
+      this.searchResultsText += ` Found ${activitiesFromDatasets.length} from selected datasets.`;
     },
   },
 };
