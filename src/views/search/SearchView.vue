@@ -21,8 +21,10 @@
             Datasets Filter
           </v-card-title>
           <v-card-text>
-            <select
+            <v-select
               v-model="selectedDatasets"
+              :items="datasets.map(dataset => ({ text: dataset.name, value: dataset.id }))"
+              label="Select Datasets"
               multiple
               chips
               outlined
@@ -30,71 +32,113 @@
               hide-details
               style="border: 1px solid #ccc; width: 100%;"
               class="py-2 px-1"
+            />
+            <!-- apply button -->
+            <v-btn
+              color="primary"
+              class="mt-2"
+              @click="fetchDatasets"
             >
-              <option
-                v-for="dataset in datasets"
-                :key="dataset.id"
-                :value="dataset.id"
-              >
-                {{ dataset.name }}
-              </option>
-            </select>
+              Apply
+            </v-btn>
           </v-card-text>
         </v-card>
       </v-col>
       <v-col class="col">
-        <!-- Multiselect Filters Placeholder -->
-        <v-card>
+        <v-card class="mt-4">
           <v-card-title class="py-2">
-            Areas Filter
+            Experiments
           </v-card-title>
           <v-card-text>
-            <div
-              class="d-flex flex-column"
-              style="border: 1px solid #ccc; width: 100%; height: 100%;"
-            >
-              <div class="d-flex flex-wrap">
-                <v-checkbox
-                  v-model="selectedCollections"
-                  label="Activities"
-                  value="collectionActi"
-                  hide-details
-                  dense
-                  class="mr-4"
-                />
-                <v-checkbox
-                  v-model="selectedCollections"
-                  label="Experiments"
-                  value="collectionExpe"
-                  hide-details
-                  dense
-                  class="mr-4"
-                />
-                <v-checkbox
-                  v-model="selectedCollections"
-                  label="Measurements"
-                  value="collectionMeas"
-                  hide-details
-                  dense
-                  class="mr-4"
-                />
-                <v-checkbox
-                  v-model="selectedCollections"
-                  label="Participants"
-                  value="collectionPart"
-                  hide-details
-                  dense
-                  class="mr-4"
-                />
-                <v-checkbox
-                  v-model="selectedCollections"
-                  label="Channels"
-                  value="collectionChan"
-                  hide-details
-                  dense
-                />
-              </div>
-            </div>
+            <v-select
+              v-model="selectedExperiments"
+              :items="[
+                { text: 'Experiment 1', value: 'experiment1' },
+                { text: 'Experiment 2', value: 'experiment2' },
+                { text: 'Experiment 3', value: 'experiment3' },
+                { text: 'Experiment 4', value: 'experiment4' },
+                { text: 'Experiment 5', value: 'experiment5' },
+                { text: 'Experiment 6', value: 'experiment6' },
+                { text: 'Experiment 7', value: 'experiment7' },
+                { text: 'Experiment 8', value: 'experiment8' },
+                { text: 'Experiment 9', value: 'experiment9' },
+                { text: 'Experiment 10', value: 'experiment10' },
+              ]"
+              label="Select Experiments"
+              multiple
+              chips
+              outlined
+              dense
+              hide-details
+            />
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col class="col">
+        <v-card class="mt-4">
+          <v-card-title class="py-2">
+            Participant sex
+          </v-card-title>
+          <v-card-text>
+            <v-select
+              v-model="selectedParticipantSex"
+              :items="[
+                { text: 'Female', value: 'female' },
+                { text: 'Male', value: 'male' },
+              ]"
+              label="Select Participant sex"
+              multiple
+              chips
+              outlined
+              dense
+              hide-details
+            />
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col class="col">
+        <v-card class="mt-4">
+          <v-card-title class="py-2">
+            Channels
+          </v-card-title>
+          <v-card-text>
+            <v-select
+              v-model="selectedChannels"
+              :items="[
+                { text: 'Channel X', value: 'channelX' },
+                { text: 'Channel Y', value: 'channelY' },
+                { text: 'Channel Z', value: 'channelZ' },
+              ]"
+              label="Select Channels"
+              multiple
+              chips
+              outlined
+              dense
+              hide-details
+            />
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col class="col">
+        <v-card class="mt-4">
+          <v-card-title class="py-2">
+            Measurements
+          </v-card-title>
+          <v-card-text>
+            <v-select
+              v-model="selectedMeasurements"
+              :items="[
+                { text: 'Measurement 1', value: 'measurement1' },
+                { text: 'Measurement 2', value: 'measurement2' },
+                { text: 'Measurement 3', value: 'measurement3' },
+              ]"
+              label="Select Measurements"
+              multiple
+              chips
+              outlined
+              dense
+              hide-details
+            />
           </v-card-text>
         </v-card>
       </v-col>
@@ -221,3 +265,10 @@ export default {
   },
 };
 </script>
+<!-- styles -->
+<style>
+  .v-select__selections {
+    margin-top: 0.8rem;
+    margin-bottom: 0.3rem;
+  }
+</style>
