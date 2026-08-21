@@ -1,8 +1,9 @@
 <template>
   <v-app-bar
-    :class="mobile ? 'mobile-app-bar' : 'ma-2 rounded-xl'"
-    :elevation="8"
     app
+    clipped-left
+    :elevation="8"
+    width="100%"
   >
     <template #default>
       <v-container class="container--fluid pa-0">
@@ -13,9 +14,8 @@
                 <v-icon
                   color="primary"
                   @click="$router.push('/')"
-                >
-                  mdi-home
-                </v-icon>
+                  v-text="'mdi-home'"
+                />
               </v-list-item-avatar>
             </v-list-item>
           </v-col>
@@ -56,8 +56,8 @@
                 </v-list-item-subtitle>
               </v-list-item-content>
               <v-list-item-content v-else>
-                <v-list-item-title class="caption">
-                  No dataset selected
+                <v-list-item-title class="subtitle-1 text-danger">
+                  Select a dataset
                 </v-list-item-title>
               </v-list-item-content>
             </v-list-item>
@@ -165,9 +165,3 @@ export default {
 };
 </script>
 
-<style scoped>
-.mobile-app-bar {
-  margin: 0 !important;
-  border-radius: 0 !important;
-}
-</style>

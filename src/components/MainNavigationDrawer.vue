@@ -9,12 +9,14 @@
     :temporary="mobile"
     :value="mobile ? drawer : true"
     app
+    clipped
     class="main-navigation-drawer white--text rounded-xl"
     color="primary"
     @input="$emit('update:drawer', $event)"
   >
     <template #default>
       <v-container class="main-navigation-drawer--content">
+        <!-- Main Navigation List -->
         <v-row style="display: flex; align-items: center">
           <v-col class="scrollable-navigation">
             <main-navigation-list
@@ -195,7 +197,7 @@ export default {
   box-shadow: 0 8px 10px -5px rgba(0, 0, 0, 0.2),
   0 16px 24px 2px rgba(0, 0, 0, 0.14),
   0 6px 30px 5px rgba(0, 0, 0, 0.12);
-  height: calc(100vh - 16px) !important;
+  height: calc(100% - 16px) !important;
   margin: 8px !important;
 }
 

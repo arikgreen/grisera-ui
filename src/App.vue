@@ -1,16 +1,19 @@
 <template>
   <v-app>
+    <!-- Main App Bar -->
+    <main-app-bar
+      v-if="!hideMainAppBar"
+      :mobile="$vuetify.breakpoint.mobile"
+      @toggle-drawer="toggleDrawer"
+    />
+    <!-- Navigation Drawer -->
     <main-navigation-drawer
       v-if="!hideNavigationDrawer"
       :collapse.sync="collapse"
       :mobile="$vuetify.breakpoint.mobile"
       :drawer.sync="drawer"
     />
-    <main-app-bar
-      v-if="!hideMainAppBar"
-      :mobile="$vuetify.breakpoint.mobile"
-      @toggle-drawer="toggleDrawer"
-    />
+    <!-- Main Content -->
     <v-main>
       <router-view />
     </v-main>
