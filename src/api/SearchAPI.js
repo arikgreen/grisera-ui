@@ -1,19 +1,37 @@
 import BaseAPI2 from '@/api/BaseAPI2';
-import DatabaseName from '@/const/relations/DatabaseName';
 
-export default class extends BaseAPI2 {
-  static getBasePath(collectionName) {
-    // search collectionName in DatabaseName object
-    const basePath = DatabaseName[collectionName];
-    if (!basePath) {
-      throw new Error(`Invalid collection name: ${collectionName}`);
-    }
-    return basePath;
+export default class SearchAPI extends BaseAPI2 {
+  /**
+   * Wykonuje wyszukiwanie pełnotekstowe w wybranych datasetach i kolekcjach.
+   * @param {Object} searchPayload
+   * @param {Array<string|number>} searchPayload.dataset_ids - Identyfikatory datasetów
+   * @param {string} [searchPayload.text] - Szukana fraza
+   * @param {Array<string>} [searchPayload.collections] - Wybrane kolekcje
+   * @param {number} [searchPayload.page=1] - Numer strony
+   * @param {number} [searchPayload.limit=10] - Liczba wyników na stronę
+   * @returns {Promise<Object>}
+   */
+  static async search(searchPayload) {
+    return await this.search_in_datasets(searchPayload);
   }
+}
 
-  static getDatasetName(datasetId) {
-    return `dataset_id=${ datasetId }`;
-  }
+// import BaseAPI2 from '@/api/BaseAPI2';
+// import DatabaseName from '@/const/relations/DatabaseName';
+
+// export default class extends BaseAPI2 {
+//   static getBasePath(collectionName) {
+//     // search collectionName in DatabaseName object
+//     const basePath = DatabaseName[collectionName];
+//     if (!basePath) {
+//       throw new Error(`Invalid collection name: ${collectionName}`);
+//     }
+//     return basePath;
+//   }
+
+//   static getDatasetName(datasetId) {
+//     return `dataset_id=${ datasetId }`;
+//   }
 
   // ${ this.getDatasetName() }
 
@@ -60,4 +78,4 @@ export default class extends BaseAPI2 {
   //     external_id: data.external_id,
   //   };
   // }
-}
+// }

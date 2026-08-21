@@ -7,162 +7,84 @@
       <v-col class="text-right">
         <v-btn
           :outlined="true"
-          @click.prevent.stop="resetStorage"
+          @click.prevent.stop="resetFilters"
         >
-          Reset storage
+          Reset Filters
         </v-btn>
       </v-col>
     </v-row>
+
+    <!-- Filtry -->
     <v-row>
-      <v-col class="col">
-        <!-- Multiselect Filters Placeholder -->
-        <v-card>
-          <v-card-title class="py-2">
-            Datasets Filter
+      <v-col cols="12" md="6">
+        <v-card outlined>
+          <v-card-title class="py-2 subtitle-1 font-weight-bold">
+            Datasets
           </v-card-title>
           <v-card-text>
             <v-select
               v-model="selectedDatasets"
-              :items="datasets.map(dataset => ({ text: dataset.name, value: dataset.id }))"
-              label="Select Datasets"
+              :items="datasetItems"
+              label="Select Datasets *"
               multiple
               chips
+              small-chips
               outlined
               dense
-              hide-details
-              style="border: 1px solid #ccc; width: 100%;"
-              class="py-2 px-1"
-            />
-            <!-- apply button -->
-            <v-btn
-              color="primary"
-              class="mt-2"
-              @click="fetchDatasets"
-            >
-              Apply
-            </v-btn>
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col class="col">
-        <v-card class="mt-4">
-          <v-card-title class="py-2">
-            Experiments
-          </v-card-title>
-          <v-card-text>
-            <v-select
-              v-model="selectedExperiments"
-              :items="[
-                { text: 'Experiment 1', value: 'experiment1' },
-                { text: 'Experiment 2', value: 'experiment2' },
-                { text: 'Experiment 3', value: 'experiment3' },
-                { text: 'Experiment 4', value: 'experiment4' },
-                { text: 'Experiment 5', value: 'experiment5' },
-                { text: 'Experiment 6', value: 'experiment6' },
-                { text: 'Experiment 7', value: 'experiment7' },
-                { text: 'Experiment 8', value: 'experiment8' },
-                { text: 'Experiment 9', value: 'experiment9' },
-                { text: 'Experiment 10', value: 'experiment10' },
-              ]"
-              label="Select Experiments"
-              multiple
-              chips
-              outlined
-              dense
-              hide-details
+              deletable-chips
+              :loading="loadingDatasets"
+              placeholder="All allowed datasets if empty"
             />
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col class="col">
-        <v-card class="mt-4">
-          <v-card-title class="py-2">
-            Participant sex
+
+      <v-col cols="12" md="6">
+        <v-card outlined>
+          <v-card-title class="py-2 subtitle-1 font-weight-bold">
+            Collections Filter
           </v-card-title>
           <v-card-text>
             <v-select
-              v-model="selectedParticipantSex"
-              :items="[
-                { text: 'Female', value: 'female' },
-                { text: 'Male', value: 'male' },
-              ]"
-              label="Select Participant sex"
+              v-model="selectedCollections"
+              :items="availableCollections"
+              label="Filter Collections"
               multiple
               chips
+              small-chips
               outlined
               dense
-              hide-details
-            />
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col class="col">
-        <v-card class="mt-4">
-          <v-card-title class="py-2">
-            Channels
-          </v-card-title>
-          <v-card-text>
-            <v-select
-              v-model="selectedChannels"
-              :items="[
-                { text: 'Channel X', value: 'channelX' },
-                { text: 'Channel Y', value: 'channelY' },
-                { text: 'Channel Z', value: 'channelZ' },
-              ]"
-              label="Select Channels"
-              multiple
-              chips
-              outlined
-              dense
-              hide-details
-            />
-          </v-card-text>
-        </v-card>
-      </v-col>
-      <v-col class="col">
-        <v-card class="mt-4">
-          <v-card-title class="py-2">
-            Measurements
-          </v-card-title>
-          <v-card-text>
-            <v-select
-              v-model="selectedMeasurements"
-              :items="[
-                { text: 'Measurement 1', value: 'measurement1' },
-                { text: 'Measurement 2', value: 'measurement2' },
-                { text: 'Measurement 3', value: 'measurement3' },
-              ]"
-              label="Select Measurements"
-              multiple
-              chips
-              outlined
-              dense
-              hide-details
+              deletable-chips
+              placeholder="All collections by default"
             />
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col class="col-12">
+
+    <!-- Pasek wyszukiwania -->
+    <v-row class="mt-2">
+      <v-col cols="12">
         <v-row>
-          <v-col cols="10">
+          <v-col cols="12" sm="10">
             <v-text-field
               v-model="searchText"
               label="What are you looking for?"
               outlined
               dense
-              hide-details
+              clearable
+              prepend-inner-icon="mdi-magnify"
+              @keydown.enter="triggerNewSearch"
             />
           </v-col>
-          <v-col
-            class="d-flex align-center"
-            cols="2"
-          >
+          <v-col cols="12" sm="2">
             <v-btn
               color="primary"
+              height="40"
               block
-              @click="search"
+              :loading="loadingSearch"
+              :disabled="loadingSearch"
+              @click="triggerNewSearch"
             >
               Search
             </v-btn>
@@ -170,20 +92,45 @@
         </v-row>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col 
-        v-model="searchResultsText"
-        class="col-12"
-      >
-        <!-- Search Results Placeholder -->
-        {{ searchResultsText }}
+
+    <!-- Tabela z wynikami -->
+    <v-row class="mt-2">
+      <v-col cols="12">
+        <v-card outlined>
+          <v-card-title class="py-2 subtitle-1 font-weight-bold">
+            Search Results ({{ totalResults }})
+          </v-card-title>
+          <v-data-table
+            :headers="tableHeaders"
+            :items="searchResults"
+            :loading="loadingSearch"
+            :server-items-length="totalResults"
+            :options.sync="tableOptions"
+            :footer-props="{
+              'items-per-page-options': [5, 10, 25, 50]
+            }"
+            class="elevation-0"
+            no-data-text="No results found. Adjust query or filters."
+          >
+            <!-- Formatowanie snippetu -->
+            <template #[`item.snippet`]="{ item }">
+              <span class="font-italic text--secondary">{{ item.snippet }}</span>
+            </template>
+
+            <!-- Formatowanie etykiety kolekcji -->
+            <template #[`item.collection`]="{ item }">
+              <v-chip small color="primary" outlined>
+                {{ item.collection }}
+              </v-chip>
+            </template>
+          </v-data-table>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import LocalStorageService from '@/storage/LocalStorageService';
 import AppBreadcrumbs from '@/components/AppBreadcrumbs.vue';
 import DatasetAPI from '@/api/DatasetAPI';
 import SearchAPI from '@/api/SearchAPI';
@@ -194,81 +141,137 @@ export default {
     AppBreadcrumbs,
   },
   data() {
-    return { 
+    return {
       selectedDatasets: [],
       selectedCollections: [],
       datasets: [],
-      collections: [],
       searchText: '',
-      searchResultsText: 'Search Results will be displayed here.',
+      searchResults: [],
+      totalResults: 0,
+      loadingDatasets: false,
+      loadingSearch: false,
+
+      // Dostępne kolekcje zgodnie ze schematem bazy Mongo
+      availableCollections: [
+        'activities',
+        'arrangements',
+        'channels',
+        'experiments',
+        'file_operation_errors',
+        'file_operations',
+        'life_activities',
+        'measure_names',
+        'measures',
+        'modalities',
+        'participants',
+        'participations',
+        'recordings',
+        'registered_channels',
+        'registered_data',
+        'scenarios',
+      ],
+
+      // Opcje paginacji v-data-table
+      tableOptions: {
+        page: 1,
+        itemsPerPage: 10,
+      },
+
+      tableHeaders: [
+        { text: 'Dataset Name', value: 'dataset_name', width: '15%' },
+        { text: 'Collection', value: 'collection', width: '20%' },
+        { text: 'Document ID', value: 'id', width: '20%' },
+        { text: 'Snippet / Match', value: 'snippet', width: '45%' },
+      ],
     };
   },
+  computed: {
+    datasetItems() {
+      return this.datasets.map(d => ({
+        text: d.name || `Dataset ${d.id}`,
+        value: d.id,
+      }));
+    },
+  },
+  watch: {
+    tableOptions: {
+      handler() {
+        if (this.searchResults.length > 0) {
+          this.executeSearch();
+        }
+      },
+      deep: true,
+    },
+  },
   async created() {
-      await this.fetchDatasets();
+    await this.fetchDatasets();
   },
   methods: {
-    resetStorage() {
-      LocalStorageService.clear();
-      LocalStorageService.init();
+    resetFilters() {
+      this.selectedDatasets = [];
+      this.selectedCollections = [];
+      this.searchText = '';
+      this.searchResults = [];
+      this.totalResults = 0;
+      this.tableOptions.page = 1;
     },
     async fetchDatasets() {
+      this.loadingDatasets = true;
       try {
-        console.log('Loading datasets...');
         const response = await DatasetAPI.index();
         this.datasets = response.data || [];
-        this.noDatasets = this.datasets.length === 0;
-        console.log('Datasets count:', this.datasets.length);
       } catch (error) {
         console.error('Error loading datasets:', error);
         this.datasets = [];
-        this.noDatasets = true;
+      } finally {
+        this.loadingDatasets = false;
       }
     },
-    async search() {
-      // Placeholder for search functionality
-      console.log('Performing search with filters:', {
-        datasets: this.selectedDatasets,
-        collections: this.selectedCollections,
-        searchText: this.searchText,
-      });
-      // Get activities from selected datasets
-      let activitiesFromDatasets = [];
-      if (this.searchText.length > 3 && this.selectedDatasets.length > 0) {
-        try {
-          for (const datasetId of this.selectedDatasets) {
-            const response = await SearchAPI.search_in_dataset(datasetId, this.searchText);
-            if (response.data) {
-              activitiesFromDatasets = [...activitiesFromDatasets, ...response.data];
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching activities from datasets:', error);
-        }
-      }
-      else {
-        // show modal or notification about insufficient input
-        console.warn('Please enter at least 4 characters and select at least one dataset to perform a search.');
-        alert('Please enter at least 4 characters and select at least one dataset to perform a search.');
+    triggerNewSearch() {
+      this.tableOptions.page = 1;
+      this.executeSearch();
+    },
+    async executeSearch() {
+      // Jeśli użytkownik nie zaznaczył konkretnych datasetów, przeszukujemy wszystkie dostępne
+      const targetDatasets = this.selectedDatasets.length > 0
+        ? this.selectedDatasets
+        : this.datasets.map(d => d.id);
+
+      if (targetDatasets.length === 0) {
+        alert('No accessible datasets found to search.');
         return;
       }
-      // // Filter activities based on search text
-      // if (this.searchText) {
-      //   const filteredActivities = activitiesFromDatasets.filter(activity => 
-      //     activity.name && activity.name.toLowerCase().includes(this.searchText.toLowerCase())
-      //   );
-      //   console.log('Filtered activities:', filteredActivities);
-      // }
 
-      this.searchResultsText = `Search performed with query: "${this.searchText}" and selected filters.`;
-      this.searchResultsText += ` Found ${activitiesFromDatasets.length} from selected datasets.`;
+      this.loadingSearch = true;
+      try {
+        const payload = {
+          dataset_ids: targetDatasets,
+          text: this.searchText ? this.searchText.trim() : null,
+          collections: this.selectedCollections.length > 0 ? this.selectedCollections : null,
+          page: this.tableOptions.page,
+          limit: this.tableOptions.itemsPerPage,
+        };
+
+        const response = await SearchAPI.search(payload);
+        const data = response.data || {};
+
+        this.searchResults = data.results || [];
+        this.totalResults = data.total || 0;
+      } catch (error) {
+        console.error('Error during search operation:', error);
+        this.searchResults = [];
+        this.totalResults = 0;
+      } finally {
+        this.loadingSearch = false;
+      }
     },
   },
 };
 </script>
-<!-- styles -->
-<style>
-  .v-select__selections {
-    margin-top: 0.8rem;
-    margin-bottom: 0.3rem;
-  }
+
+<style scoped>
+.v-select__selections {
+  margin-top: 0.5rem;
+  margin-bottom: 0.3rem;
+}
 </style>

@@ -94,10 +94,11 @@ export default class BaseAPI2 {
     });
   }
 
-  static search_in_dataset(datasetId, searchText) {
-    return apiService.get(`/search?${ this.getDatasetName(datasetId) }&search=${ encodeURIComponent(searchText) }`).then(({ data }) => {
-      data = data.activities.map(e => this.dTOFrontToAPI(e));
-      return { data };
-    });
+  static search_in_datasets(searchPayload) {
+    // return apiService.get(`/search?${ this.getDatasetName(datasetId) }&search=${ encodeURIComponent(searchText) }`).then(({ data }) => {
+    //   data = data.activities.map(e => this.dTOFrontToAPI(e));
+    //   return { data };
+    // });
+    return apiService.post('/search', searchPayload);
   }
 }
