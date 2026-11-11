@@ -122,6 +122,16 @@
               <v-chip small color="primary" outlined>
                 {{ item.collection }}
               </v-chip>
+              <!-- link to collection -->
+              <v-icon
+                small
+                color="primary"
+                outlined
+                class="ml-2"
+                @click="$router.push(`/datasets/${item.dataset_id}/${item.collection}`)"
+              >
+                mdi-open-in-new
+              </v-icon>
             </template>
           </v-data-table>
         </v-card>
