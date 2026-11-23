@@ -213,7 +213,7 @@ export default {
 .main-navigation-drawer--content {
   display: flex;
   align-items: center;
-  height: 100%;
+  /* height: 100%; */
 }
 
 .navbar-copyrights {
