@@ -10,6 +10,12 @@ export const apiService = axios.create({
   },
 });
 
+export function setApiBaseUrl(url) {
+  if (url) {
+    apiService.defaults.baseURL = url;
+  }
+}
+
 apiService.interceptors.request.use(
     async config => {
       try {
@@ -28,6 +34,7 @@ apiService.interceptors.request.use(
 );
 
 export default class BaseAPI2 {
+
   static getBasePath() {
     return '';
   }

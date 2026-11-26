@@ -63,6 +63,33 @@
             </v-list-item>
           </v-col>
           <v-spacer />
+          <!-- Backend Selector -->
+          <v-col class="shrink pa-0 my-auto mr-3">
+            <v-btn-toggle
+              v-model="activeBackend"
+              mandatory
+              dense
+              borderless
+              color="primary"
+            >
+              <v-btn
+                small
+                value="mongo"
+                @click="onSelectBackend('mongo')"
+              >
+                <v-icon small left>mdi-leaf</v-icon>
+                MongoDB
+              </v-btn>
+              <v-btn
+                small
+                value="neo4j"
+                @click="onSelectBackend('neo4j')"
+              >
+                <v-icon small left>mdi-graphql</v-icon>
+                Neo4j
+              </v-btn>
+            </v-btn-toggle>
+          </v-col>
           <v-col class="shrink pa-0 mr-4">
             <v-list-item class="d-flex">
               <v-list-item-avatar
@@ -143,13 +170,34 @@ export default {
     ...mapState({
       dataset: state => state.dataset,
       user: state => state.user,
+      apiBackend: state => state.apiBackend,
     }),
+    activeBackend: {
+      get() {
+        return this.$store.state.apiBackend || 'mongo';
+      },
+      set(val) {
+        if (val && val !== this.$store.state.apiBackend) {
+          this.$store.dispatch('switchApiBackend', val);
+        }
+      },
+    },
   },
   mounted() {
     this.userName = AuthService.getIdTokenParsed()?.preferred_username || 'Guest';
     this.isAuthenticated = AuthService.isAuthenticated();
   },
   methods: {
+    async onSelectBackend(backend) {
+      if (backend === this.$store.state.apiBackend) return;
+      await this.$store.dispatch('switchApiBackend', backend);
+      if (this.$route.name !== 'datasets') {
+        this.$router.push({ name: 'datasets' });
+      } else {
+        // Force refresh current datasets view
+        this.$router.go(0);
+      }
+    },
     logout() {
       AuthService.logout();
       this.$router.push('/login');

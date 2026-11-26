@@ -6,12 +6,19 @@ import router from './router';
 import store from './store';
 import keycloak from '@/keycloak/keycloak-config';
 import PermissionsService from '@/services/PermissionsService';
+import config from '../config.js';
+import { setApiBaseUrl } from '@/api/BaseAPI2';
 
 Vue.config.productionTip = false;
 
 LocalStorageService.init();
 
+// Initialize active backend URL from store
+const initialBackend = store.state.apiBackend || 'mongo';
+setApiBaseUrl(initialBackend === 'neo4j' ? config.neo4jApiUrl : config.apiUrl);
+
 keycloak.onAuthSuccess = () => {
+
     PermissionsService.getUserPermissions(keycloak.tokenParsed.sub).then(data =>
         router.app.$store.commit('setPermissions', data.data));
 };

@@ -2,11 +2,14 @@ import roles from '@/acl/roles';
 import Vue from 'vue';
 import Vuex from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
+import config from '../../config.js';
+import { setApiBaseUrl } from '@/api/BaseAPI2';
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
+    apiBackend: 'mongo', // 'mongo' | 'neo4j'
     datasets: [],
     dataset: undefined,
     user: undefined,
@@ -16,26 +19,32 @@ const store = new Vuex.Store({
     imports: [],
   },
   mutations: {
+    setApiBackend(state, backend) {
+      state.apiBackend = backend === 'neo4j' ? 'neo4j' : 'mongo';
+      const targetUrl = state.apiBackend === 'neo4j' ? config.neo4jApiUrl : config.apiUrl;
+      setApiBaseUrl(targetUrl);
+    },
     setDatasets(state, values) {
       state.datasets = [...values];
     },
     setDataset(state, value) {
-      state.dataset = { ...value };
+      state.dataset = value ? { ...value } : undefined;
     },
     setUser(state, value) {
-      state.user = { ...value };
+      state.user = value ? { ...value } : undefined;
     },
     setPermissions(state, value) {
       state.permissions = value;
 
       if (!Array.isArray(value)) {
         console.error('Permissions should be an array of { datasetId, role } objects');
+        return;
       }
 
       value.forEach(({ datasetId, role }) => state.scopes[datasetId] = roles[role] || []);
     },
     setData(state, value) {
-      state.data = { ...value };
+      state.data = value ? { ...value } : undefined;
     },
     addImport(state, importData) {
       console.log('Store: Adding import:', importData);
@@ -46,7 +55,6 @@ const store = new Vuex.Store({
         dataset_id: importData.dataset_id,
         created_at: importData.created_at || new Date().toISOString(),
         description: importData.description,
-        // import_type: importData.import_type,
       });
       console.log('Store: Imports after adding:', state.imports);
     },
@@ -73,11 +81,18 @@ const store = new Vuex.Store({
         ));
     },
   },
-  actions: {},
+  actions: {
+    switchApiBackend({ commit }, backend) {
+      commit('setApiBackend', backend);
+      commit('setDataset', undefined);
+      commit('setDatasets', []);
+    },
+  },
   getters: {
+    getApiBackend: state => state.apiBackend || 'mongo',
     getUser: state => state.user,
     getDataset: state => state.dataset,
-    getPermission: state => state.permissions.filter(permission => permission.datasetId == state.dataset.id)[0],
+    getPermission: state => state.permissions?.find(permission => permission.datasetId == state.dataset?.id),
     getActiveImports: state => {
       const activeImports = state.imports.filter(imp =>
         imp.status === 'pending' || imp.status === 'processing',
@@ -97,7 +112,11 @@ const store = new Vuex.Store({
       return hasActive;
     },
   },
-  plugins: [createPersistedState()], // Commented out - will be added back if needed
+  plugins: [
+    createPersistedState({
+      paths: ['apiBackend', 'dataset'],
+    }),
+  ],
 });
 
 Vue.prototype.$store = store;
